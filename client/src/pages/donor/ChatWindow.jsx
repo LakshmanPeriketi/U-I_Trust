@@ -21,7 +21,7 @@ export default function ChatWindow() {
 
   const fetchChatData = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = (JSON.parse(localStorage.getItem('uandi_user') || '{}')?.token);
       const headers = { Authorization: token ? `Bearer ${token}` : '' };
 
       const [matchRes, msgRes] = await Promise.all([
@@ -65,7 +65,7 @@ export default function ChatWindow() {
     setSending(true);
 
     try {
-      const token = localStorage.getItem('token');
+      const token = (JSON.parse(localStorage.getItem('uandi_user') || '{}')?.token);
       const res = await fetch(`/api/messages/${matchId}`, {
         method: 'POST',
         headers: {

@@ -39,7 +39,7 @@ export default function CreateListing() {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
+      const token = (JSON.parse(localStorage.getItem('uandi_user') || '{}')?.token);
       const cleanPhotos = formData.photos.map((p) => p.trim()).filter(Boolean);
 
       const res = await fetch('/api/donations', {

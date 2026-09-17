@@ -23,7 +23,7 @@ export default function MatchStatus() {
   const fetchMatches = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = (JSON.parse(localStorage.getItem('uandi_user') || '{}')?.token);
       const res = await fetch('/api/matches/mine', {
         headers: {
           Authorization: token ? `Bearer ${token}` : '',
@@ -56,7 +56,7 @@ export default function MatchStatus() {
     setRatingSubmitting(true);
     setRatingMessage('');
     try {
-      const token = localStorage.getItem('token');
+      const token = (JSON.parse(localStorage.getItem('uandi_user') || '{}')?.token);
       const res = await fetch(`/api/matches/${matchId}/rate-ngo`, {
         method: 'POST',
         headers: {
