@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+server/.env
+client/.env
+
+# Production build outputs
+dist/
+build/
+client/dist/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# Cache directories
+.cache/
+.eslintcache
+.vite/
