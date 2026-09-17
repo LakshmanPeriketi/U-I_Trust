@@ -1,18 +1,15 @@
-import { Router }     from 'express';
+import express from 'express';
 import authMiddleware from '../middleware/authMiddleware.js';
-import requireRole    from '../middleware/requireRole.js';
 import {
   confirmReceipt,
   usageUpdate,
   rateDonor,
 } from '../controllers/ngoMatchActionsController.js';
 
-const router = Router();
+const router = express.Router();
 
-router.use(authMiddleware, requireRole('ngo'));
-
-router.post('/:matchId/confirm-receipt', confirmReceipt);
-router.post('/:matchId/usage-update',    usageUpdate);
-router.post('/:matchId/rate-donor',      rateDonor);
+router.patch('/:id/confirm-receipt', authMiddleware, confirmReceipt);
+router.post('/:id/usage-update', authMiddleware, usageUpdate);
+router.post('/:id/rate-donor', authMiddleware, rateDonor);
 
 export default router;
