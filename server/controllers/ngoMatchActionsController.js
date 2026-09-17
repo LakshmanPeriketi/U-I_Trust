@@ -9,9 +9,10 @@ export const confirmReceipt = async (req, res) => {
     
     if (!match) return res.status(404).json({ message: 'Match not found' });
     
-    // Accept in_transit (as fallback to handover_scheduled conceptual status if not present in schema)
-    if (match.status !== 'in_transit') {
-      return res.status(400).json({ message: 'Match is not in transit' });
+    // Accept confirmed, handover_scheduled, or in_transit match status
+    const validReceiptStatuses = ['confirmed', 'handover_scheduled', 'in_transit'];
+    if (!validReceiptStatuses.includes(match.status)) {
+      return res.status(400).json({ message: `Match status '${match.status}' cannot be confirmed as received. Required status: ${validReceiptStatuses.join(', ')}` });
     }
     
     match.status = 'received';

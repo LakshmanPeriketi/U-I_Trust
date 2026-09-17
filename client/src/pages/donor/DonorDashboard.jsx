@@ -9,10 +9,21 @@ export default function DonorDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  const getAuthToken = () => {
+    const stored = localStorage.getItem('uandi_user');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (parsed?.token) return parsed.token;
+      } catch {}
+    }
+    return localStorage.getItem('token') || '';
+  };
+
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      const token = (JSON.parse(localStorage.getItem('uandi_user') || '{}')?.token);
+      const token = getAuthToken();
       const headers = { Authorization: token ? `Bearer ${token}` : '' };
 
       const [donRes, matchRes] = await Promise.all([
