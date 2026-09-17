@@ -13,19 +13,21 @@ export const register = async (req, res) => {
       return res.status(400).json({ message: 'name, email, password and role are required' });
     }
 
-    if (await User.findOne({ email })) {
+    const cleanEmail = email.trim().toLowerCase();
+
+    if (await User.findOne({ email: cleanEmail })) {
       return res.status(409).json({ message: 'Email already registered' });
     }
 
     // passwordHash field — pre-save hook will bcrypt it
     const user = await User.create({
-      name,
-      email,
+      name:         name.trim(),
+      email:        cleanEmail,
       phone:        phone  || undefined,
       passwordHash: password,
       role,
       area:         area   || undefined,
-      status:       role === 'admin' ? 'verified' : 'pending',
+      status:       (role === 'admin' || role === 'donor') ? 'verified' : 'pending',
     });
 
     const token = signToken(user._id);
@@ -48,7 +50,9 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: 'email and password are required' });
     }
 
-    const user = await User.findOne({ email });
+    const cleanEmail = email.trim().toLowerCase();
+
+    const user = await User.findOne({ email: cleanEmail });
     if (!user || !(await user.matchPassword(password))) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }

@@ -33,13 +33,24 @@ export default function CreateListing() {
     setFormData((prev) => ({ ...prev, photos: newPhotos.length ? newPhotos : [''] }));
   };
 
+  const getAuthToken = () => {
+    const stored = localStorage.getItem('uandi_user');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (parsed?.token) return parsed.token;
+      } catch {}
+    }
+    return localStorage.getItem('token') || '';
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
+      const token = getAuthToken();
       const cleanPhotos = formData.photos.map((p) => p.trim()).filter(Boolean);
 
       const res = await fetch('/api/donations', {

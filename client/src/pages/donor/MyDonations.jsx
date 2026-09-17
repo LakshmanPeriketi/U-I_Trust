@@ -7,10 +7,21 @@ export default function MyDonations() {
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('all');
 
+  const getAuthToken = () => {
+    const stored = localStorage.getItem('uandi_user');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (parsed?.token) return parsed.token;
+      } catch {}
+    }
+    return localStorage.getItem('token') || '';
+  };
+
   const fetchDonations = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = getAuthToken();
       const res = await fetch('/api/donations/mine', {
         headers: {
           Authorization: token ? `Bearer ${token}` : '',
@@ -35,7 +46,7 @@ export default function MyDonations() {
   const handleCancel = async (id) => {
     if (!window.confirm('Are you sure you want to cancel this donation listing?')) return;
     try {
-      const token = localStorage.getItem('token');
+      const token = getAuthToken();
       const res = await fetch(`/api/donations/${id}`, {
         method: 'DELETE',
         headers: {

@@ -17,10 +17,21 @@ export default function RequirementBoard() {
   const [pledgeError, setPledgeError] = useState('');
   const [pledgeSuccess, setPledgeSuccess] = useState(false);
 
+  const getAuthToken = () => {
+    const stored = localStorage.getItem('uandi_user');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (parsed?.token) return parsed.token;
+      } catch {}
+    }
+    return localStorage.getItem('token') || '';
+  };
+
   const fetchData = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = getAuthToken();
       const headers = { Authorization: token ? `Bearer ${token}` : '' };
 
       const [reqRes, donRes] = await Promise.all([
@@ -69,7 +80,7 @@ export default function RequirementBoard() {
     setPledgeLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
+      const token = getAuthToken();
       const res = await fetch('/api/matches', {
         method: 'POST',
         headers: {

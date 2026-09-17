@@ -13,7 +13,10 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
-      try { setUser(JSON.parse(stored)); }
+      try {
+        const parsed = JSON.parse(stored);
+        setUser(parsed.user || parsed);
+      }
       catch { localStorage.removeItem(STORAGE_KEY); }
     }
     setLoading(false);

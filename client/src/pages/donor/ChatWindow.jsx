@@ -19,9 +19,20 @@ export default function ChatWindow() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const getAuthToken = () => {
+    const stored = localStorage.getItem('uandi_user');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (parsed?.token) return parsed.token;
+      } catch {}
+    }
+    return localStorage.getItem('token') || '';
+  };
+
   const fetchChatData = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = getAuthToken();
       const headers = { Authorization: token ? `Bearer ${token}` : '' };
 
       const [matchRes, msgRes] = await Promise.all([
@@ -65,7 +76,7 @@ export default function ChatWindow() {
     setSending(true);
 
     try {
-      const token = localStorage.getItem('token');
+      const token = getAuthToken();
       const res = await fetch(`/api/messages/${matchId}`, {
         method: 'POST',
         headers: {
