@@ -46,6 +46,15 @@ export default function App() {
           {/* Default redirect to login */}
           <Route path="/" element={<Navigate to="/login" replace />} />
 
+          {/* ── Shared Chat Route (accessible by donor, ngo, and admin) ──── */}
+          <Route element={<ProtectedRoute allowedRoles={['donor', 'ngo', 'admin']} />}>
+            <Route element={<Layout />}>
+              <Route path="/donor/chat/:matchId" element={<ChatWindow />} />
+              <Route path="/ngo/chat/:matchId"   element={<ChatWindow />} />
+              <Route path="/chat/:matchId"       element={<ChatWindow />} />
+            </Route>
+          </Route>
+
           {/* ── Donor routes (/donor/*) ───────────────────────────────── */}
           <Route element={<ProtectedRoute allowedRoles={['donor']} />}>
             <Route element={<Layout />}>
@@ -54,7 +63,6 @@ export default function App() {
               <Route path="/donor/my-donations"       element={<MyDonations />} />
               <Route path="/donor/requirement-board"  element={<RequirementBoard />} />
               <Route path="/donor/match-status"       element={<MatchStatus />} />
-              <Route path="/donor/chat/:matchId"      element={<ChatWindow />} />
             </Route>
           </Route>
 

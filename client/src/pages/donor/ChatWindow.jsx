@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
+import api from '../../services/api.js';
 
 export default function ChatWindow() {
   const { matchId } = useParams();
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const [match, setMatch] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -19,38 +21,19 @@ export default function ChatWindow() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const getAuthToken = () => {
-    const stored = localStorage.getItem('uandi_user');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (parsed?.token) return parsed.token;
-      } catch {}
-    }
-    return localStorage.getItem('token') || '';
-  };
-
   const fetchChatData = async () => {
     try {
-      const token = getAuthToken();
-      const headers = { Authorization: token ? `Bearer ${token}` : '' };
-
       const [matchRes, msgRes] = await Promise.all([
-        fetch(`/api/matches/${matchId}`, { headers }),
-        fetch(`/api/messages/${matchId}`, { headers }),
+        api.get(`/matches/${matchId}`),
+        api.get(`/messages/${matchId}`),
       ]);
 
-      const matchData = await matchRes.json();
-      const msgData = await msgRes.json();
-
-      if (!matchRes.ok) throw new Error(matchData.message || 'Failed to load match info');
-      if (!msgRes.ok) throw new Error(msgData.message || 'Failed to load messages');
-
-      setMatch(matchData);
-      setMessages(Array.isArray(msgData) ? msgData : []);
+      setMatch(matchRes.data);
+      setMessages(Array.isArray(msgRes.data) ? msgRes.data : []);
       setError('');
     } catch (err) {
-      setError(err.message || 'Error loading chat');
+      console.error('Error loading chat:', err);
+      setError(err.response?.data?.message || err.message || 'Error loading chat');
     } finally {
       setLoading(false);
     }
@@ -58,7 +41,7 @@ export default function ChatWindow() {
 
   useEffect(() => {
     fetchChatData();
-    // 3-second polling interval for messages
+    // 3-second polling interval for real-time messages
     const interval = setInterval(fetchChatData, 3000);
     return () => clearInterval(interval);
   }, [matchId]);
@@ -76,45 +59,46 @@ export default function ChatWindow() {
     setSending(true);
 
     try {
-      const token = getAuthToken();
-      const res = await fetch(`/api/messages/${matchId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: token ? `Bearer ${token}` : '',
-        },
-        body: JSON.stringify({ content }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || 'Failed to send message');
-      }
-
+      const { data } = await api.post(`/messages/${matchId}`, { content });
       setMessages((prev) => [...prev, data]);
       scrollToBottom();
     } catch (err) {
-      alert(err.message);
+      alert(err.response?.data?.message || 'Failed to send message');
     } finally {
       setSending(false);
     }
   };
 
+  const handleBack = () => {
+    if (user?.role === 'ngo') {
+      navigate('/ngo/incoming-matches');
+    } else {
+      navigate('/donor/match-status');
+    }
+  };
+
+  // Safe counterpart calculation
+  const currentUserId = String(user?.id || user?._id || '');
+  const donorIdStr = typeof match?.donorId === 'object' ? match?.donorId?._id : match?.donorId;
+  const isCurrentDonor = currentUserId === String(donorIdStr || '');
+
   const counterpartName = match
-    ? (user?._id === match.donorId?._id ? match.ngoId?.name : match.donorId?.name) || 'Counterparty'
-    : 'NGO Partner';
+    ? isCurrentDonor
+      ? match.ngoId?.name || 'NGO Partner'
+      : match.donorId?.name || 'Donor'
+    : 'Chat Partner';
 
   return (
     <div className="max-w-4xl mx-auto py-6 px-4">
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
-        <Link
-          to="/donor/match-status"
-          className="text-xs text-gray-400 hover:text-white border border-gray-700 hover:border-gray-500 px-3 py-1.5 rounded transition-colors"
+        <button
+          onClick={handleBack}
+          className="text-xs text-gray-300 hover:text-white border border-gray-700 hover:border-gray-500 px-3 py-1.5 rounded transition flex items-center gap-1 font-semibold"
         >
-          &larr; Back to Match Tracker
-        </Link>
-        <span className="text-xs text-gray-500 font-mono">Match ID: {matchId}</span>
+          ← Back to {user?.role === 'ngo' ? 'Incoming Matches' : 'Match Tracker'}
+        </button>
+        <span className="text-xs text-gray-400 font-mono">Match ID: {matchId}</span>
       </div>
 
       {error && (
@@ -126,7 +110,7 @@ export default function ChatWindow() {
       {loading ? (
         <div className="py-12 text-center text-gray-400 text-sm">Loading chat thread...</div>
       ) : (
-        <div className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden flex flex-col h-[600px]">
+        <div className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden flex flex-col h-[600px] shadow-xl">
           {/* Chat Top Banner */}
           <div className="bg-gray-900 border-b border-gray-700 p-4 flex items-center justify-between">
             <div>
@@ -135,15 +119,15 @@ export default function ChatWindow() {
               </h2>
               <p className="text-xs text-gray-400 mt-0.5">
                 Item:{' '}
-                <span className="text-gray-200 font-medium">
-                  {match?.donationId?.itemType || 'Donation Item'}
+                <span className="text-gray-200 font-medium capitalize">
+                  {match?.donationId?.itemType || match?.requirementId?.itemType || 'Donation Item'}
                 </span>
                 {' · '}
                 <span className="capitalize text-blue-400 font-semibold">{match?.status?.replace(/_/g, ' ')}</span>
               </p>
             </div>
             {match?.ngoId?.area && (
-              <span className="text-xs text-gray-400 bg-gray-800 border border-gray-700 px-2.5 py-1 rounded">
+              <span className="text-xs text-gray-300 bg-gray-800 border border-gray-700 px-2.5 py-1 rounded">
                 📍 {match.ngoId.area}
               </span>
             )}
@@ -157,7 +141,11 @@ export default function ChatWindow() {
               </div>
             ) : (
               messages.map((msg) => {
-                const isMine = msg.senderId?._id === user?._id || msg.senderId === user?._id;
+                const msgSenderId = typeof msg.senderId === 'object' ? msg.senderId?._id : msg.senderId;
+                const isMine = String(msgSenderId) === currentUserId;
+                const senderName = msg.senderId?.name || (isMine ? 'You' : counterpartName);
+                const senderRole = msg.senderId?.role;
+
                 return (
                   <div
                     key={msg._id}
@@ -165,11 +153,11 @@ export default function ChatWindow() {
                   >
                     <div className="flex items-center gap-1.5 mb-1 text-[11px] text-gray-400">
                       <span className="font-semibold text-gray-300">
-                        {isMine ? 'You' : msg.senderId?.name || counterpartName}
+                        {isMine ? 'You' : senderName}
                       </span>
-                      {msg.senderId?.role && (
-                        <span className="uppercase text-[9px] px-1 py-0.2 bg-gray-800 border border-gray-700 text-gray-400 rounded">
-                          {msg.senderId.role}
+                      {senderRole && (
+                        <span className="uppercase text-[9px] px-1 py-0.2 bg-gray-800 border border-gray-700 text-gray-300 rounded font-mono">
+                          {senderRole}
                         </span>
                       )}
                       <span>·</span>
@@ -179,8 +167,8 @@ export default function ChatWindow() {
                     <div
                       className={`max-w-[75%] px-4 py-2.5 rounded-lg text-sm leading-relaxed ${
                         isMine
-                          ? 'bg-blue-600 text-white rounded-br-none'
-                          : 'bg-gray-800 text-gray-100 border border-gray-700 rounded-bl-none'
+                          ? 'bg-blue-600 text-white rounded-br-none shadow'
+                          : 'bg-gray-800 text-gray-100 border border-gray-700 rounded-bl-none shadow'
                       }`}
                     >
                       {msg.content}
@@ -206,7 +194,7 @@ export default function ChatWindow() {
               disabled={sending || !inputText.trim()}
               className="text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded transition-colors disabled:opacity-50"
             >
-              Send
+              {sending ? 'Sending...' : 'Send'}
             </button>
           </form>
         </div>
@@ -214,4 +202,3 @@ export default function ChatWindow() {
     </div>
   );
 }
-
