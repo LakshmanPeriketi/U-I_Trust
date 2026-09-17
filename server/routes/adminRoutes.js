@@ -6,7 +6,7 @@ import {
   approveNGO,
   rejectNGO,
   listUsers,
-  deactivateUser,
+  manageUserStatus,
   listDisputes,
   resolveDispute,
   getQuotaConfig,
@@ -25,7 +25,7 @@ router.patch('/vetting/:id/reject',  rejectNGO);
 
 // Users
 router.get('/users',                 listUsers);
-router.patch('/users/:id/deactivate',deactivateUser);
+router.patch('/users/:id/:action',   manageUserStatus);
 
 // Disputes
 router.get('/disputes',              listDisputes);
