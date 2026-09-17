@@ -5,7 +5,7 @@ export default function DisputeReview() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/admin/disputes', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
+    fetch('/api/admin/disputes', { headers: { Authorization: `Bearer ${(JSON.parse(localStorage.getItem('uandi_user') || '{}')?.token)}` } })
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) setMatches(data);
