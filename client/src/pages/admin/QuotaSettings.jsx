@@ -7,7 +7,7 @@ export default function QuotaSettings() {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    fetch('/api/admin/users', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
+    fetch('/api/admin/users', { headers: { Authorization: `Bearer ${(JSON.parse(localStorage.getItem('uandi_user') || '{}')?.token)}` } })
       .then(res => res.json())
       .then(data => { if (Array.isArray(data)) setNgos(data.filter(u => u.role === 'ngo')); })
       .catch(console.error);

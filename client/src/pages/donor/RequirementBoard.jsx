@@ -20,7 +20,7 @@ export default function RequirementBoard() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = (JSON.parse(localStorage.getItem('uandi_user') || '{}')?.token);
       const headers = { Authorization: token ? `Bearer ${token}` : '' };
 
       const [reqRes, donRes] = await Promise.all([
@@ -69,7 +69,7 @@ export default function RequirementBoard() {
     setPledgeLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
+      const token = (JSON.parse(localStorage.getItem('uandi_user') || '{}')?.token);
       const res = await fetch('/api/matches', {
         method: 'POST',
         headers: {

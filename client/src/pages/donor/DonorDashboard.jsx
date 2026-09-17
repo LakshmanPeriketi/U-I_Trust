@@ -12,7 +12,7 @@ export default function DonorDashboard() {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = (JSON.parse(localStorage.getItem('uandi_user') || '{}')?.token);
       const headers = { Authorization: token ? `Bearer ${token}` : '' };
 
       const [donRes, matchRes] = await Promise.all([
