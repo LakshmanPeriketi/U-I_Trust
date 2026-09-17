@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-// Owned by Donor PRD after foundation merge — foundation only writes shape.
+// Owned by Donor PRD — messages scoped to matchId
 const messageSchema = new mongoose.Schema(
   {
     matchId:  { type: mongoose.Schema.Types.ObjectId, ref: 'Match', required: true },
@@ -10,6 +10,5 @@ const messageSchema = new mongoose.Schema(
   { timestamps: true }   // createdAt maps to PRD's created_at
 );
 
-// TODO: Donor PRD implements logic here
-
 export default mongoose.model('Message', messageSchema);
+

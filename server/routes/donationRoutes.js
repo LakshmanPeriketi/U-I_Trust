@@ -13,10 +13,12 @@ const router = Router();
 
 router.use(authMiddleware);
 
-router.get('/',     listDonations);
-router.post('/',    requireRole('donor'), createDonation);
-router.get('/:id',  getDonation);
-router.patch('/:id', requireRole('donor'), updateDonation);
+router.get('/',       listDonations);
+router.get('/mine',   listDonations);
+router.post('/',      requireRole('donor'), createDonation);
+router.get('/:id',    getDonation);
+router.patch('/:id',  requireRole('donor'), updateDonation);
 router.delete('/:id', requireRole('donor'), deleteDonation);
 
 export default router;
+
