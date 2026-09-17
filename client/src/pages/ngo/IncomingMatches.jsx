@@ -122,7 +122,7 @@ export default function IncomingMatches() {
             const badge = getStatusBadge(match.status);
             const donorName = match.donorId?.name || (typeof match.donorId === 'string' ? match.donorId : 'Anonymous Donor');
             const donorArea = match.donorId?.area;
-            const donorRating = match.donorId?.rating;
+            const donorOverallRating = match.donorId?.rating;
 
             const itemName = match.donationId?.itemType || match.requirementId?.itemType || 'Donated Item';
             const quantity = match.donationId?.quantity || 1;
@@ -172,10 +172,22 @@ export default function IncomingMatches() {
                         <span className="text-gray-300">{donorArea}</span>
                       </div>
                     )}
-                    {donorRating && (
+                    {donorOverallRating && (
                       <div className="flex justify-between items-center">
-                        <span className="text-gray-400">Donor Rating:</span>
-                        <span className="text-yellow-400 font-semibold">★ {donorRating} / 5</span>
+                        <span className="text-gray-400">Donor Profile Rating:</span>
+                        <span className="text-yellow-400 font-semibold">★ {donorOverallRating} / 5</span>
+                      </div>
+                    )}
+                    {match.ngoRating && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-green-400 font-medium">Donor rated you:</span>
+                        <span className="text-green-400 font-bold">★ {match.ngoRating} / 5</span>
+                      </div>
+                    )}
+                    {match.donorRating && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-blue-400 font-medium">You rated donor:</span>
+                        <span className="text-blue-400 font-bold">★ {match.donorRating} / 5</span>
                       </div>
                     )}
                   </div>

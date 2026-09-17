@@ -306,8 +306,15 @@ export default function MatchStatus() {
                   <div className="pt-4 border-t border-gray-700">
                     <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Rate NGO Experience</h4>
                     {selectedMatch.ngoRating ? (
-                      <div className="text-xs text-green-400 font-medium">
-                        ✓ You rated this NGO <span className="font-bold">{selectedMatch.ngoRating} ★</span>
+                      <div className="text-xs font-medium space-y-1">
+                        <div className="text-green-400">
+                          ✓ You rated this NGO <span className="font-bold">{selectedMatch.ngoRating} ★</span>
+                        </div>
+                        {selectedMatch.donorRating && (
+                          <div className="text-blue-400 mt-1">
+                            🌟 The NGO rated you <span className="font-bold">{selectedMatch.donorRating} ★</span>
+                          </div>
+                        )}
                       </div>
                     ) : (
                       <div className="bg-gray-900 border border-gray-700 rounded p-4 space-y-3">

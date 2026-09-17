@@ -66,8 +66,8 @@ export default function UsageUpdateForm() {
 
       <div className="space-y-6">
         
-        {/* State 1: Confirm Receipt (Only if in_transit) */}
-        {match.status === 'in_transit' && (
+        {/* State 1: Confirm Receipt (Only if confirmed, handover_scheduled, or in_transit) */}
+        {['confirmed', 'handover_scheduled', 'in_transit'].includes(match.status) && (
           <div className="bg-gray-700/50 p-4 rounded border border-gray-600">
             <h3 className="font-semibold text-white mb-2">Confirm Receipt</h3>
             <input 
